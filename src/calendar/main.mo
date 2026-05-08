@@ -309,7 +309,7 @@ actor {
     };
 
     if (endTime <= startTime) {
-      return #err("end time must be greater than start time");
+      return #err("end time must be after start time");
     };
 
     let validatedTitle = validateName(title, "event title");
@@ -357,7 +357,7 @@ actor {
     };
 
     if (endTime <= startTime) {
-      return #err("end time must be greater than start time");
+      return #err("end time must be after start time");
     };
 
     let validatedTitle = validateName(title, "event title");
