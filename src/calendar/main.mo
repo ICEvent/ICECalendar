@@ -8,6 +8,7 @@ import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+import TrieSet "mo:base/TrieSet";
 
 actor {
   public type CalendarKind = { #individual; #group };
@@ -63,15 +64,19 @@ actor {
 
   private func normalizeMembers(owner : Principal, members : [Principal]) : [Principal] {
     let buffer = Buffer.Buffer<Principal>(members.size());
+    var seen = TrieSet.empty<Principal>();
+
     for (member in members.vals()) {
       if (
         not Principal.equal(member, owner) and
         not Principal.equal(member, anonymousPrincipal) and
-        not principalExists(Buffer.toArray(buffer), member)
+        not TrieSet.mem<Principal>(seen, member, Principal.hash(member), Principal.equal)
       ) {
+        seen := TrieSet.put<Principal>(seen, member, Principal.hash(member), Principal.equal);
         buffer.add(member);
       };
     };
+
     Buffer.toArray(buffer);
   };
 
@@ -97,6 +102,14 @@ actor {
       #err(field # " cannot be empty");
     } else {
       #ok(cleaned);
+    };
+  };
+
+  private func validateEventTimeRange(startTime : Int, endTime : Int) : Result.Result<(), Text> {
+    if (endTime < startTime) {
+      #err("end time must be on or after start time");
+    } else {
+      #ok(());
     };
   };
 
@@ -308,8 +321,9 @@ actor {
       return #err("anonymous caller is not allowed");
     };
 
-    if (endTime < startTime) {
-      return #err("end time must be on or after start time");
+    switch (validateEventTimeRange(startTime, endTime)) {
+      case (#err(message)) { return #err(message) };
+      case (#ok(_)) {};
     };
 
     let validatedTitle = validateName(title, "event title");
@@ -356,8 +370,9 @@ actor {
       return #err("anonymous caller is not allowed");
     };
 
-    if (endTime < startTime) {
-      return #err("end time must be on or after start time");
+    switch (validateEventTimeRange(startTime, endTime)) {
+      case (#err(message)) { return #err(message) };
+      case (#ok(_)) {};
     };
 
     let validatedTitle = validateName(title, "event title");
