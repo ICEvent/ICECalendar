@@ -8,7 +8,6 @@ import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
-import TrieSet "mo:base/TrieSet";
 
 actor {
   public type CalendarKind = { #individual; #group };
@@ -66,15 +65,15 @@ actor {
 
   private func normalizeMembers(owner : Principal, members : [Principal]) : [Principal] {
     let buffer = Buffer.Buffer<Principal>(members.size());
-    var seen = TrieSet.empty<Principal>();
+    let seen = HashMap.HashMap<Principal, Bool>(members.size() + 1, Principal.equal, Principal.hash);
 
     for (member in members.vals()) {
       if (
         not Principal.equal(member, owner) and
         not Principal.equal(member, anonymousPrincipal) and
-        not TrieSet.mem<Principal>(seen, member, Principal.hash(member), Principal.equal)
+        seen.get(member) == null
       ) {
-        seen := TrieSet.put<Principal>(seen, member, Principal.hash(member), Principal.equal);
+        seen.put(member, true);
         buffer.add(member);
       };
     };
