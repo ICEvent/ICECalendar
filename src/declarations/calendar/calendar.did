@@ -1,3 +1,39 @@
+type Calendar = record {
+  id : nat;
+  kind : CalendarKind;
+  name : text;
+  owner : principal;
+  members : vec principal;
+  createdAt : int;
+  updatedAt : int;
+};
+type CalendarKind = variant { individual; group };
+type Event = record {
+  id : nat;
+  calendarId : nat;
+  title : text;
+  description : text;
+  startTime : int;
+  endTime : int;
+  createdBy : principal;
+  createdAt : int;
+  updatedAt : int;
+};
+type ResultBool = variant { ok : bool; err : text };
+type ResultCalendar = variant { ok : Calendar; err : text };
+type ResultEvent = variant { ok : Event; err : text };
+type ResultEvents = variant { ok : vec Event; err : text };
 service : {
-  greet: (text) -> (text);
+  addGroupMember : (nat, principal) -> (ResultCalendar);
+  changeCalendarName : (nat, text) -> (ResultCalendar);
+  createEvent : (nat, text, text, int, int) -> (ResultEvent);
+  createGroupCalendar : (text, vec principal) -> (ResultCalendar);
+  createIndividualCalendar : (text) -> (ResultCalendar);
+  deleteEvent : (nat) -> (ResultBool);
+  getCalendar : (nat) -> (opt Calendar) query;
+  getCalendarEvents : (nat) -> (ResultEvents) query;
+  getEvent : (nat) -> (ResultEvent) query;
+  getMyCalendars : () -> (vec Calendar) query;
+  removeGroupMember : (nat, principal) -> (ResultCalendar);
+  updateEvent : (nat, text, text, int, int) -> (ResultEvent);
 }
