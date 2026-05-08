@@ -308,8 +308,8 @@ actor {
       return #err("anonymous caller is not allowed");
     };
 
-    if (endTime <= startTime) {
-      return #err("end time must be after start time");
+    if (endTime < startTime) {
+      return #err("end time must be on or after start time");
     };
 
     let validatedTitle = validateName(title, "event title");
@@ -356,8 +356,8 @@ actor {
       return #err("anonymous caller is not allowed");
     };
 
-    if (endTime <= startTime) {
-      return #err("end time must be after start time");
+    if (endTime < startTime) {
+      return #err("end time must be on or after start time");
     };
 
     let validatedTitle = validateName(title, "event title");
@@ -463,8 +463,11 @@ actor {
   };
 
   system func postupgrade() {
-    calendars := HashMap.HashMap<Nat, Calendar>(32, Nat.equal, Nat.hash);
-    events := HashMap.HashMap<Nat, Event>(64, Nat.equal, Nat.hash);
+    let calendarCapacity = Nat.max(1, calendarEntries.size());
+    let eventCapacity = Nat.max(1, eventEntries.size());
+
+    calendars := HashMap.HashMap<Nat, Calendar>(calendarCapacity, Nat.equal, Nat.hash);
+    events := HashMap.HashMap<Nat, Event>(eventCapacity, Nat.equal, Nat.hash);
 
     for ((id, calendar) in calendarEntries.vals()) {
       calendars.put(id, calendar);
