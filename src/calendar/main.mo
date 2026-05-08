@@ -36,14 +36,16 @@ actor {
   };
 
   private let anonymousPrincipal : Principal = Principal.fromText("2vxsx-fae");
+  private let initialCalendarCapacity : Nat = 32;
+  private let initialEventCapacity : Nat = 64;
 
   stable var nextCalendarId : Nat = 1;
   stable var nextEventId : Nat = 1;
   stable var calendarEntries : [(Nat, Calendar)] = [];
   stable var eventEntries : [(Nat, Event)] = [];
 
-  var calendars = HashMap.HashMap<Nat, Calendar>(32, Nat.equal, Nat.hash);
-  var events = HashMap.HashMap<Nat, Event>(64, Nat.equal, Nat.hash);
+  var calendars = HashMap.HashMap<Nat, Calendar>(initialCalendarCapacity, Nat.equal, Nat.hash);
+  var events = HashMap.HashMap<Nat, Event>(initialEventCapacity, Nat.equal, Nat.hash);
 
   private func trim(value : Text) : Text {
     Text.trim(value, #predicate(Char.isWhitespace));
@@ -478,8 +480,8 @@ actor {
   };
 
   system func postupgrade() {
-    let calendarCapacity = Nat.max(1, calendarEntries.size());
-    let eventCapacity = Nat.max(1, eventEntries.size());
+    let calendarCapacity = Nat.max(initialCalendarCapacity, calendarEntries.size() * 2);
+    let eventCapacity = Nat.max(initialEventCapacity, eventEntries.size() * 2);
 
     calendars := HashMap.HashMap<Nat, Calendar>(calendarCapacity, Nat.equal, Nat.hash);
     events := HashMap.HashMap<Nat, Event>(eventCapacity, Nat.equal, Nat.hash);
