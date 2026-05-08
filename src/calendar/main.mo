@@ -172,7 +172,7 @@ actor {
       return [];
     };
 
-    let result = Buffer.Buffer<Calendar>(0);
+    let result = Buffer.Buffer<Calendar>(initialCalendarCapacity);
     for ((_, calendar) in calendars.entries()) {
       if (isCalendarMember(caller, calendar)) {
         result.add(calendar);
@@ -461,7 +461,7 @@ actor {
         switch (requireCalendarAccess(caller, calendar)) {
           case (#err(message)) { #err(message) };
           case (#ok(_)) {
-            let result = Buffer.Buffer<Event>(0);
+            let result = Buffer.Buffer<Event>(initialEventCapacity);
             for ((_, event) in events.entries()) {
               if (event.calendarId == calendarId) {
                 result.add(event);
